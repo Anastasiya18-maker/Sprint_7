@@ -1,8 +1,10 @@
 import pytest
 import requests
 import allure
-from data.URLs import url
 from data.courier_data import generation_new_data_courier
+from conftest import courier_delete
+from data.URLs import url
+
 import logging
 
 
@@ -11,9 +13,10 @@ class TestCreateCourier:
 
     @allure.title('Создание курьера')
     @allure.step('Проверка создания курьера (код - 201 и текст - "ok": True')
-    def test_create_courier(self, registered_courier_data):
+    def test_create_courier(self, share_data):
         data = generation_new_data_courier()
         data.pop("firstName")  # Удаляем поле для теста
+        share_data["data"] = data
         payload = data
         logging.info(f"Data for courier creation: {data}")
 
@@ -31,14 +34,15 @@ class TestCreateCourier:
         courier_id = login_response.json().get("id")
         assert courier_id is not None, "Courier ID not found in login response."
 
-        # Удаление созданного курьера
-        delete_response = requests.delete(f"{url}/api/v1/courier/{courier_id}")
-        assert delete_response.status_code == 200, "Не удалось удалить курьера."
+
+        courier_delete(courier_id, url)
 
     @allure.title('Проверка невозможности создать курьера. Дублирующие креды')
     @allure.description('Проверка, что нельзя создать курьера с уже существующими кредами (код - 409 и текст - "message": "Этот логин уже используется. Попробуйте другой."')
-    def test_create_courier_duplicate_login(self, registered_courier_data):
-        payload = registered_courier_data
+    def test_create_courier_duplicate_login(self, share_data):
+        payload = share_data["data"]
+
+        requests.post(f"{url}/api/v1/courier", data=payload)
         response = requests.post(f"{url}/api/v1/courier", data=payload)
 
         assert response.status_code == 409, "Курьер с дублирующими данными был создан."

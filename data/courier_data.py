@@ -1,4 +1,3 @@
-import pytest
 import requests
 import random
 import string
