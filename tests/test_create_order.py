@@ -40,7 +40,6 @@ class TestCreateOrder:
         assert r.status_code == 201
         assert 'track' in r.json()
 
-        d = {"track":str(r.json()["track"])}
-        print(d)
-        courier_order_cancel(d)
+
+        courier_order_cancel(r.json()["track"])
 
