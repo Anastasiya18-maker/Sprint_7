@@ -40,9 +40,7 @@ def courier_order_cancel(track):
     print(cancel_response.json())
     assert cancel_response.status_code == 200
 
-@pytest.fixture(scope="session")
-def share_data():
-    return {"data":None}
+
 
 
 
